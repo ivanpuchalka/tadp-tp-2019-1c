@@ -1,5 +1,5 @@
 import org.scalatest.{FreeSpec, Matchers}
-import parser.{DoesNotSatisfyPredicateException, EmptyStringException, ExpectedButFound, NotADigitException, NotALetterException, NotAlphaNumException, OrException, alphaNum, anyChar, char, digit, letter, string, void}
+import parser.{DoesNotSatisfyPredicateException, EmptyStringException, ExpectedButFound, NotADigitException, NotALetterException, NotAlphaNumException, OrException, alphaNum, anyChar, char, digit, id, letter, string, void}
 
 import scala.util.{Failure, Success}
 
@@ -283,5 +283,40 @@ class ParserSpec extends FreeSpec with Matchers {
   "map should fail if the original parser fails" in {
     val Failure(reason) = digit.map(_.toUpper)("batman")
     reason shouldBe NotADigitException('b')
+  }
+
+  "id should not consume any character" in {
+    val Success((parsed, remaining)) = id("abcdefg")
+    parsed shouldBe()
+    remaining shouldBe "abcdefg"
+  }
+
+  "oneOf should parse something parsed by one of its arguments" in {
+    val Success((parsed, remaining)) = parser.oneOf('a', 'b', 'c', 'd')("cdefg")
+    parsed shouldBe 'c'
+    remaining shouldBe "defg"
+  }
+
+  "oneOf should not parse something not parsed by any of its arguments" in {
+    val Failure(reason) = parser.oneOf(letter, digit, alphaNum)("-+*/")
+    reason shouldBe OrException(List(NotALetterException('-'), NotADigitException('-'), NotAlphaNumException('-')))
+  }
+
+  "oneOf should not parse empty string" in {
+    val Failure(reason) = parser.oneOf('a', "bc")("")
+    reason shouldBe EmptyStringException
+  }
+
+  "mapError should map error with provided function" in {
+    case class CustomException(e: Throwable) extends Exception
+    val Failure(reason) = digit.mapError { case e => CustomException(e) }("a")
+    reason shouldBe CustomException(NotADigitException('a'))
+  }
+
+  "mapError should not change anything on successful parse" in {
+    case class CustomException(e: Throwable) extends Exception
+    val Success((parsed, remaining)) = digit.mapError { case e => CustomException(e) }("123")
+    parsed shouldBe '1'
+    remaining shouldBe "23"
   }
 }
