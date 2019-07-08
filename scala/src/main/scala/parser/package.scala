@@ -3,6 +3,10 @@ import scala.util.{Failure, Success, Try}
 package object parser {
   type Result[+A] = Try[(A, String)]
 
+  val id: Parser[Any] = new Parser[Any] {
+    override def apply(input: String): Result[Any] = Success((), input)
+  }
+
   object anyChar extends Parser[Char] {
 
     override def apply(input: String): Result[Char] = input match {
@@ -24,13 +28,7 @@ package object parser {
     case e => e
   }
 
-  case class string(prefix: String) extends Parser[String] {
-    override def apply(input: String): Result[String] =
-      if (input.startsWith(prefix))
-        Success(prefix, input.replaceFirst(prefix, ""))
-      else
-        Failure(DoesNotStartWithException(prefix, input))
-  }
+  def string(expected: String): Parser[String] = expected.foldLeft(id)(_ <> char(_)).const(expected)
 
   def oneOf[A](parsers: Parser[A]*): Parser[A] = parsers.reduce(_ <|> _)
 
@@ -51,33 +49,6 @@ package object parser {
   implicit def charToParser(c: Char): Parser[Char] = char(c)
 
   implicit def stringToParser(s: String): Parser[String] = string(s)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   implicit def flatten2[A, B, C](f: (A, B) => C) =

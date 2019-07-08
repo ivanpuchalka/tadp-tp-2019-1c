@@ -1,5 +1,5 @@
 import org.scalatest.{FreeSpec, Matchers}
-import parser.{DoesNotSatisfyPredicateException, DoesNotStartWithException, EmptyStringException, ExpectedButFound, NotADigitException, NotALetterException, NotAlphaNumException, OrException, Parser, alphaNum, anyChar, char, digit, letter, string, void, ~}
+import parser.{DoesNotSatisfyPredicateException, EmptyStringException, ExpectedButFound, NotADigitException, NotALetterException, NotAlphaNumException, OrException, alphaNum, anyChar, char, digit, letter, string, void}
 
 import scala.util.{Failure, Success}
 
@@ -107,7 +107,7 @@ class ProjectSpec extends FreeSpec with Matchers {
 
   "string should not parse an input that does not start with the specified string" in {
     val Failure(reason) = string("karen")("rodri tiene sueño")
-    reason shouldBe DoesNotStartWithException("karen", "rodri tiene sueño")
+    reason shouldBe ExpectedButFound('k', 'r')
   }
 
   "string should not parse empty string" in {
