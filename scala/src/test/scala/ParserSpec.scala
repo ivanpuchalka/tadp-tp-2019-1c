@@ -3,7 +3,7 @@ import parser.{DoesNotSatisfyPredicateException, EmptyStringException, ExpectedB
 
 import scala.util.{Failure, Success}
 
-class ProjectSpec extends FreeSpec with Matchers {
+class ParserSpec extends FreeSpec with Matchers {
 
   import parser.TildeSyntax
 
@@ -135,7 +135,7 @@ class ProjectSpec extends FreeSpec with Matchers {
     reason shouldBe OrException(NotADigitException('-'), NotALetterException('-'))
   }
 
-  "<> should parse a secuence of something parsed by the first parser followed by something parsed by the second" in {
+  "<> should parse a sequence of something parsed by the first parser followed by something parsed by the second" in {
     val parser = char('h') <> digit
     val Success((parsed, remaining)) = parser("h1")
     parsed shouldBe 'h' ~ '1'
@@ -154,7 +154,7 @@ class ProjectSpec extends FreeSpec with Matchers {
     reason shouldBe NotADigitException('a')
   }
 
-  "~> should parse a secuence of something parsed by the first parser followed by something parsed by the second and return the value of the second" in {
+  "~> should parse something parsed by the first parser followed by something parsed by the second and return the value of the second" in {
     val parser = char('h') ~> digit
     val Success((parsed, remaining)) = parser("h1")
     parsed shouldBe '1'
@@ -173,7 +173,7 @@ class ProjectSpec extends FreeSpec with Matchers {
     reason shouldBe NotALetterException('2')
   }
 
-  "<~ should parse a secuence of something parsed by the first parser followed by something parsed by the second and return the value of the first" in {
+  "<~ should parse something parsed by the first parser followed by something parsed by the second and return the value of the first" in {
     val parser = char('h') <~ digit
     val Success((parsed, remaining)) = parser("h1")
     parsed shouldBe 'h'
@@ -252,7 +252,7 @@ class ProjectSpec extends FreeSpec with Matchers {
     remaining shouldBe ""
   }
 
-  "sepBy should parse a secuence parsed by the original parser until it fails separated by something parsed by its argument and return a list of parsed values" in {
+  "sepBy should parse a sequence parsed by the original parser until it fails separated by something parsed by its argument and return a list of parsed values" in {
     val Success((value, remaining)) = digit.sepBy(char('-'))("1-2-3-4-f")
     value shouldBe List('1', '2', '3', '4')
     remaining shouldBe "-f"
